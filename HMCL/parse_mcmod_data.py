@@ -42,8 +42,7 @@ def parseCurseforge(url):
     if res.scheme not in ['http', 'https']:
         return ''
     for pattern in [CURSEFORGE_PATTERN1, CURSEFORGE_PATTERN2, CURSEFORGE_PATTERN3, CURSEFORGE_PATTERN4]:
-        match = pattern.match(res.path)
-        if match:
+        if match := pattern.match(res.path):
             return match.group('modid')
     return ''
 
@@ -53,10 +52,7 @@ MCMOD_PATTERN = re.compile(
 
 
 def parseMcmod(url):
-    match = MCMOD_PATTERN.match(url)
-    if match:
-        return match.group('modid')
-    return ''
+    return match.group('modid') if (match := MCMOD_PATTERN.match(url)) else ''
 
 
 MCBBS_HTML_PATTERN = re.compile(r'/+thread-(?P<modid>\d+)-(\d+)-(\d+).html')
@@ -69,8 +65,7 @@ def parseMcbbs(url):
         return ''
     if res.netloc != 'www.mcbbs.net':
         return ''
-    match = MCBBS_HTML_PATTERN.match(res.path)
-    if match:
+    if match := MCBBS_HTML_PATTERN.match(res.path):
         return match.group('modid')
 
     query = parse_qs(res.query)
@@ -91,7 +86,7 @@ skip = [
 if __name__ == '__main__':
     json_name = sys.argv[1] or 'data.json'
 
-    with codecs.open(json_name, mode='r', encoding='utf-8-sig') as jsonfile, codecs.open('data.csv', mode='w', encoding='utf-8') as outfile:
+    with (codecs.open(json_name, mode='r', encoding='utf-8-sig') as jsonfile, codecs.open('data.csv', mode='w', encoding='utf-8') as outfile):
         data = json.load(jsonfile)
 
         for mod in data:
@@ -103,11 +98,11 @@ if __name__ == '__main__':
                 continue
 
             if S in chinese_name:
-                print('Error! ' + chinese_name)
+                print(f'Error! {chinese_name}')
                 exit(1)
 
             if S in sub_name:
-                print('Error! ' + chinese_name)
+                print(f'Error! {chinese_name}')
                 exit(1)
 
             black_lists = [
@@ -124,24 +119,24 @@ if __name__ == '__main__':
                     if curseforge_id != '':
                         break
                 if curseforge_id == '':
-                    print('Error curseforge ' + chinese_name)
+                    print(f'Error curseforge {chinese_name}')
                     exit(1)
             if 'mcmod' in links and links['mcmod']:
                 mcmod_id = parseMcmod(links['mcmod'][0]['url'])
                 if mcmod_id == '':
-                    print('Error mcmod ' + chinese_name)
+                    print(f'Error mcmod {chinese_name}')
                     exit(1)
             if 'mcbbs' in links and links['mcbbs']:
                 mcbbs_id = parseMcbbs(links['mcbbs'][0]['url'])
                 if mcbbs_id == '':
-                    print('Error mcbbs ' + chinese_name)
+                    print(f'Error mcbbs {chinese_name}')
                     exit(1)
 
             mod_id = []
             if 'modid' in mod and 'list' in mod['modid']:
                 for id in mod['modid']['list']:
                     if MOD_SEPARATOR in id:
-                        print('Error mod id!' + id)
+                        print(f'Error mod id!{id}')
                         exit(1)
 
                     mod_id.append(id)
